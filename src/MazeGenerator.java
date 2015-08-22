@@ -100,8 +100,7 @@ public class MazeGenerator {
 	}
 	
 	public static void main(String[] args) {
-		byte[][] maze =  generateRecursiveBacktrackerMaze(10, 10);
-		printMazeArray(maze);
+
 	}
 	
 }
