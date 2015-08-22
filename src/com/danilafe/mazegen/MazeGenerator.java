@@ -1,3 +1,4 @@
+package com.danilafe.mazegen;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -157,7 +158,11 @@ public class MazeGenerator {
 	}
 	
 	public static void main(String[] args) {
-
+		System.out.println("Running Tests");
+		System.out.println("Generating Recursive Backtracker Maze");
+		long millis = System.currentTimeMillis();
+		printMazeArray(generateRecursiveBacktrackerMaze(10, 10));
+		System.out.println("Operation Took " + (System.currentTimeMillis() - millis) + " millis");
 	}
 	
 }
