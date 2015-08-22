@@ -1,6 +1,11 @@
 package com.danilafe.mazegen;
 import java.util.Random;
 
+/**
+ * A class to generate mazes!
+ * @author danilafe
+ * @version 1.0
+ */
 public class MazeGenerator {
 
 	private static Random random = new Random();
