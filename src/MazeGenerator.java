@@ -24,13 +24,41 @@ public class MazeGenerator {
 			}
 		}
 		
+		backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height);
+		
 		return mazeArray;
 	}
 	
-	public static void backtrack(byte[][] array, int pos_x, int pos_y, int pos_prevx, int pos_prevy){
+	public static void backtrack(byte[][] array, int pos_x, int pos_y, int pos_prevx, int pos_prevy, int mazeWidth, int mazeHeight){
 		writeBetween(array, pos_x, pos_y, pos_prevx, pos_prevy, (byte) 2); 
 		writeToMazeRarray(array, pos_x, pos_y, (byte) 2);
-		if(isSurrounded(array, pos_x, pos_y)) return;
+		while(!isSurrounded(array, pos_x, pos_y)){
+			int direction = random.nextInt(4);
+			int[] newCheckPos = new int[2];
+			switch(direction){
+			case 0:
+				newCheckPos[0] = pos_x - 1;
+				newCheckPos[1] = pos_y;
+				break;
+			case 1: 
+				newCheckPos[0] = pos_x + 1;
+				newCheckPos[1] = pos_y;
+				break;
+			case 2:
+				newCheckPos[0] = pos_x;
+				newCheckPos[1] = pos_y - 1;
+				break;
+			case 3:
+				newCheckPos[0] = pos_x;
+				newCheckPos[1] = pos_y + 1;
+				break;
+			}
+			if((newCheckPos[0] < 0) || (newCheckPos[0] > mazeWidth - 1) || (newCheckPos[1] < 0) || (newCheckPos[1] > mazeHeight - 1)) continue;
+			if(getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 2){
+				backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight);
+			}
+			
+		}
 	}
 	
 	public static void printMazeArray(byte[][] maze){
@@ -62,11 +90,12 @@ public class MazeGenerator {
 	}
 	
 	public static byte getArrayValue(byte[][] maze, int w, int h){
+		if((w < 0) || (w > ((maze.length - 1) / 2) - 1) || (h < 0) || (h > ((maze[0].length - 1) / 2) - 1)) return - 1;
 		return maze[w * 2 + 1][h * 2 + 1];
 	}
 
 	public static boolean isSurrounded(byte[][] maze, int w, int h){
-		if(getArrayValue(maze, w - 1, h) == 2 && getArrayValue(maze, w + 1, h) == 2 && getArrayValue(maze, w, h - 1) == 2 && getArrayValue(maze, w, h + 1) == 2) return true;
+		if((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1) && (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1) && (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1) && (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1)) return true;
 		return false;
 	}
 	
