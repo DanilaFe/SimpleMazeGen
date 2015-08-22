@@ -29,7 +29,7 @@ public class MazeGenerator {
 		return mazeArray;
 	}
 	
-	public static void backtrack(byte[][] array, int pos_x, int pos_y, int pos_prevx, int pos_prevy, int mazeWidth, int mazeHeight){
+	private static void backtrack(byte[][] array, int pos_x, int pos_y, int pos_prevx, int pos_prevy, int mazeWidth, int mazeHeight){
 		writeBetween(array, pos_x, pos_y, pos_prevx, pos_prevy, (byte) 2); 
 		writeToMazeRarray(array, pos_x, pos_y, (byte) 2);
 		while(!isSurrounded(array, pos_x, pos_y)){
@@ -81,20 +81,20 @@ public class MazeGenerator {
 		}	
 	}
 
-	public static void writeToMazeRarray(byte[][] maze, int w, int h, byte val){
+	private static void writeToMazeRarray(byte[][] maze, int w, int h, byte val){
 		maze[w * 2 + 1][h * 2 + 1] = val;
 	}
 	
-	public static void writeBetween(byte[][] maze, int w1, int h1, int w2, int h2, byte val){
+	private static void writeBetween(byte[][] maze, int w1, int h1, int w2, int h2, byte val){
 		maze[((w1 * 2 + 1) + (w2 * 2 + 1)) / 2][((h1 * 2 + 1) + (h2 * 2 + 1)) / 2] = val;
 	}
 	
-	public static byte getArrayValue(byte[][] maze, int w, int h){
+	private static byte getArrayValue(byte[][] maze, int w, int h){
 		if((w < 0) || (w > ((maze.length - 1) / 2) - 1) || (h < 0) || (h > ((maze[0].length - 1) / 2) - 1)) return - 1;
 		return maze[w * 2 + 1][h * 2 + 1];
 	}
 
-	public static boolean isSurrounded(byte[][] maze, int w, int h){
+	private static boolean isSurrounded(byte[][] maze, int w, int h){
 		if((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1) && (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1) && (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1) && (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1)) return true;
 		return false;
 	}
