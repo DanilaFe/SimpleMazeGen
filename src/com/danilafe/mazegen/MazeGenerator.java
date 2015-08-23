@@ -21,19 +21,20 @@ public class MazeGenerator {
 	 * @return the generated array of bytes. 0 means wall, 1 means unvisited and 2 means empty.
 	 */
 	public static byte[][] generateRecursiveBacktrackerMaze(int width, int height){
-		// Initialize variables
 		byte[][] mazeArray = new byte[width * 2 + 1][height * 2 + 1];
-		int[] cursorPos = new int[]{
-			random.nextInt(width),
-			random.nextInt(height)
-		};
-		
-		// Fill Array
 		for(int i = 0; i < mazeArray.length; i++){
 			for(int j = 0; j < mazeArray[0].length; j++){
 				mazeArray[i][j] = ((i % 2 == 1) && (j % 2 == 1)) ? (byte) 1 : (byte) 0;
 			}
 		}
+		int[] cursorPos;
+		do {
+			cursorPos = new int[]{
+					random.nextInt(width),
+					random.nextInt(height)
+				};
+		} while (getArrayValue(mazeArray, cursorPos[0], cursorPos[1]) != 1);
+		
 		
 		backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height);
 		
