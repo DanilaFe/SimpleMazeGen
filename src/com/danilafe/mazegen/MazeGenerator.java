@@ -22,6 +22,11 @@ public class MazeGenerator {
 	 */
 	public static byte[][] generateRecursiveBacktrackerMaze(int width, int height){
 		byte[][] mazeArray = new byte[width * 2 + 1][height * 2 + 1];
+		for(int i = 0; i < mazeArray.length; i++){
+			for(int j = 0; j < mazeArray[0].length; j++){
+				mazeArray[i][j] = ((i % 2 == 1) && (j % 2 == 1)) ? (byte) 1 : (byte) 0;
+			}
+		}
 		
 		generateRecursiveBacktrackerMaze(mazeArray);
 		
@@ -31,12 +36,6 @@ public class MazeGenerator {
 	public static void generateRecursiveBacktrackerMaze(byte[][] mazeArray){
 		int width = (mazeArray.length - 1) / 2;
 		int height = (mazeArray[0].length - 1) / 2;
-		
-		for(int i = 0; i < mazeArray.length; i++){
-			for(int j = 0; j < mazeArray[0].length; j++){
-				mazeArray[i][j] = ((i % 2 == 1) && (j % 2 == 1)) ? (byte) 1 : (byte) 0;
-			}
-		}
 		int[] cursorPos;
 		do {
 			cursorPos = new int[]{
