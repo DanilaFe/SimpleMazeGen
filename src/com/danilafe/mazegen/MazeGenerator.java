@@ -33,6 +33,17 @@ public class MazeGenerator {
 		return mazeArray;
 	}
 	
+	/**
+	 * Fills the given array with maze pathways. Existing rooms do not get connected on purpose. 
+	 * @param mazeArray the array to use for generating a maze. Has to be a "walled" array, represented as follows: <br>
+	 * <table>
+	 * <tr><td># </td><td># </td><td># </td><td># </td><td># </td></tr>
+	 * <tr><td># </td><td>  </td><td># </td><td>  </td><td># </td></tr>
+	 * <tr><td># </td><td># </td><td># </td><td># </td><td># </td></tr>
+	 * <tr><td># </td><td>  </td><td># </td><td>  </td><td># </td></tr>
+	 * <tr><td># </td><td># </td><td># </td><td># </td><td># </td></tr>
+	 * </table>
+	 */
 	public static void generateRecursiveBacktrackerMaze(byte[][] mazeArray){
 		int width = (mazeArray.length - 1) / 2;
 		int height = (mazeArray[0].length - 1) / 2;
@@ -90,7 +101,7 @@ public class MazeGenerator {
 				break;
 			}
 			if((newCheckPos[0] < 0) || (newCheckPos[0] > mazeWidth - 1) || (newCheckPos[1] < 0) || (newCheckPos[1] > mazeHeight - 1)) continue;
-			if(getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 2){
+			if(getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 2 && getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 3){
 				backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight);
 			}
 			
@@ -113,6 +124,9 @@ public class MazeGenerator {
 					break;
 				case 2:
 					System.out.print(" ");
+					break;
+				case 3:
+					System.out.print("+");
 					break;
 				}
 				System.out.print(" ");
@@ -165,10 +179,10 @@ public class MazeGenerator {
 	 * @return
 	 */
 	private static boolean isSurrounded(byte[][] maze, int w, int h){
-		return ((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1) 
-				&& (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1)
-				&& (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1)
-				&& (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1));
+		return ((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1 || getArrayValue(maze, w - 1, h) == 3) 
+				&& (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1 || getArrayValue(maze, w + 1, h) == 3)
+				&& (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1 || getArrayValue(maze, w, h - 1) == 3)
+				&& (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1 || getArrayValue(maze, w, h + 1) == 3));
 	}
 	
 	public static void main(String[] args) {
