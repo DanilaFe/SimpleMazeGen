@@ -185,6 +185,22 @@ public class MazeGenerator {
 				&& (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1 || getArrayValue(maze, w, h + 1) == 3));
 	}
 	
+	private static void fillArea(byte[][] maze, int w1, int h1, int w2, int h2, byte value){
+		boolean w2Bigger = w2 > w1;
+		boolean h2Bigger = h2 > h1;
+		for(int h = h1; (h2Bigger && h <= h2) || (!h2Bigger && h >= h2); h += (h2Bigger) ? 1 : -1){
+			for(int w = w1; (w2Bigger && w <= w2) || (!w2Bigger && w >= w2); w += (w2Bigger) ? 1 : -1){
+				if(w != w2)
+				writeBetween(maze, w, h, w + ((w2Bigger) ? 1 : -1), h, (byte) 3);
+				if(h != h2)
+				writeBetween(maze, w, h, w, h + ((h2Bigger) ? 1 : -1), (byte) 3);
+				if(h != h2 && w != w2)
+				writeBetween(maze, w, h, w + ((w2Bigger) ? 1 : -1), h + ((h2Bigger) ? 1 : -1), value);
+				writeToMazeRarray(maze, w, h, (byte) 3); 
+			}
+		}
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Running Tests");
 		System.out.println("Generating Recursive Backtracker Maze");
