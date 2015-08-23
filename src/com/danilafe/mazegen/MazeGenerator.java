@@ -29,8 +29,8 @@ public class MazeGenerator {
 		};
 		
 		// Fill Array
-		for(int i = 0; i < mazeArray.length; i ++){
-			for(int j = 0; j < mazeArray[0].length; j ++){
+		for(int i = 0; i < mazeArray.length; i++){
+			for(int j = 0; j < mazeArray[0].length; j++){
 				mazeArray[i][j] = ((i % 2 == 1) && (j % 2 == 1)) ? (byte) 1 : (byte) 0;
 			}
 		}
@@ -94,8 +94,8 @@ public class MazeGenerator {
 	 * @param maze the maze array to print.
 	 */
 	public static void printMazeArray(byte[][] maze){
-		for(int h = 0; h < maze[0].length; h ++){
-			for(int w = 0; w < maze.length; w ++){
+		for(int h = 0; h < maze[0].length; h++){
+			for(int w = 0; w < maze.length; w++){
 				switch (maze[w][h]) {
 				case 0:
 					System.out.print("#");
@@ -157,8 +157,10 @@ public class MazeGenerator {
 	 * @return
 	 */
 	private static boolean isSurrounded(byte[][] maze, int w, int h){
-		if((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1) && (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1) && (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1) && (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1)) return true;
-		return false;
+		return ((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1) 
+				&& (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1)
+				&& (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1)
+				&& (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1));
 	}
 	
 	public static void main(String[] args) {
