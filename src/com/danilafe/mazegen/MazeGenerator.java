@@ -14,7 +14,7 @@ public class MazeGenerator {
 		
 	}
 	
-	private static byte[][] newBlankWalledArray(int width, int height){
+	public static byte[][] newBlankWalledArray(int width, int height){
 		byte[][] mazeArray = new byte[width * 2 + 1][height * 2 + 1];
 		for(int i = 0; i < mazeArray.length; i++){
 			for(int j = 0; j < mazeArray[0].length; j++){
@@ -239,7 +239,7 @@ public class MazeGenerator {
 	 * @param iterations how many times to try place a room
 	 * @param maxDim the maximum possible width / height of a room.
 	 */
-	private static void fillWithRooms(byte[][] array, int iterations, int maxDim){
+	public static void fillWithRooms(byte[][] array, int iterations, int maxDim){
 		int arrayWidthCorridors = (array.length - 1) / 2;
 		int arrayHeightCorridors = (array[0].length - 1) / 2;
 		for(int i = 0; i < iterations; i++){
@@ -290,7 +290,7 @@ public class MazeGenerator {
 	 * Finds areas with room tiles, and if they are adjacent to empty corridors, connects them and also marks them as empty space.
 	 * @param array the array to perform the operation on.
 	 */
-	private static void connectPassages(byte[][] array){
+	public static void connectPassages(byte[][] array){
 		for(int h = 0; h < array[0].length; h ++){
 			for(int w = 0; w < array.length; w ++){
 				if(isConnector(array, w, h, (byte) 3, (byte) 2)){
