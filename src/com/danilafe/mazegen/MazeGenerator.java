@@ -14,6 +14,17 @@ public class MazeGenerator {
 		
 	}
 	
+	private static byte[][] newBlankWalledArray(int width, int height){
+		byte[][] mazeArray = new byte[width * 2 + 1][height * 2 + 1];
+		for(int i = 0; i < mazeArray.length; i++){
+			for(int j = 0; j < mazeArray[0].length; j++){
+				mazeArray[i][j] = ((i % 2 == 1) && (j % 2 == 1)) ? (byte) 1 : (byte) 0;
+			}
+		}
+		return mazeArray;
+	}
+	
+	
 	/**
 	 * Generates a new maze using the Recursive Backtracker algorithm. 
 	 * @param width the width of the generated maze, in "corridors" - walls don't count as part of the width.
@@ -21,23 +32,37 @@ public class MazeGenerator {
 	 * @return the generated array of bytes. 0 means wall, 1 means unvisited and 2 means empty.
 	 */
 	public static byte[][] generateRecursiveBacktrackerMaze(int width, int height){
-		// Initialize variables
-		byte[][] mazeArray = new byte[width * 2 + 1][height * 2 + 1];
-		int[] cursorPos = new int[]{
-			random.nextInt(width),
-			random.nextInt(height)
-		};
+		byte[][] mazeArray = newBlankWalledArray(width, height);
 		
-		// Fill Array
-		for(int i = 0; i < mazeArray.length; i++){
-			for(int j = 0; j < mazeArray[0].length; j++){
-				mazeArray[i][j] = ((i % 2 == 1) && (j % 2 == 1)) ? (byte) 1 : (byte) 0;
-			}
-		}
-		
-		backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height);
+		generateRecursiveBacktrackerMaze(mazeArray);
 		
 		return mazeArray;
+	}
+	
+	/**
+	 * Fills the given array with maze pathways. Existing rooms do not get connected on purpose. 
+	 * @param mazeArray the array to use for generating a maze. Has to be a "walled" array, represented as follows: <br>
+	 * <table>
+	 * <tr><td># </td><td># </td><td># </td><td># </td><td># </td></tr>
+	 * <tr><td># </td><td>  </td><td># </td><td>  </td><td># </td></tr>
+	 * <tr><td># </td><td># </td><td># </td><td># </td><td># </td></tr>
+	 * <tr><td># </td><td>  </td><td># </td><td>  </td><td># </td></tr>
+	 * <tr><td># </td><td># </td><td># </td><td># </td><td># </td></tr>
+	 * </table>
+	 */
+	public static void generateRecursiveBacktrackerMaze(byte[][] mazeArray){
+		int width = (mazeArray.length - 1) / 2;
+		int height = (mazeArray[0].length - 1) / 2;
+		int[] cursorPos;
+		do {
+			cursorPos = new int[]{
+					random.nextInt(width),
+					random.nextInt(height)
+				};
+		} while (getArrayValue(mazeArray, cursorPos[0], cursorPos[1]) != 1);
+		
+		
+		backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height);
 	}
 	
 	/**
@@ -82,7 +107,7 @@ public class MazeGenerator {
 				break;
 			}
 			if((newCheckPos[0] < 0) || (newCheckPos[0] > mazeWidth - 1) || (newCheckPos[1] < 0) || (newCheckPos[1] > mazeHeight - 1)) continue;
-			if(getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 2){
+			if(getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 2 && getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 3){
 				backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight);
 			}
 			
@@ -105,6 +130,9 @@ public class MazeGenerator {
 					break;
 				case 2:
 					System.out.print(" ");
+					break;
+				case 3:
+					System.out.print("+");
 					break;
 				}
 				System.out.print(" ");
@@ -157,10 +185,120 @@ public class MazeGenerator {
 	 * @return
 	 */
 	private static boolean isSurrounded(byte[][] maze, int w, int h){
-		return ((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1) 
-				&& (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1)
-				&& (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1)
-				&& (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1));
+		return ((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1 || getArrayValue(maze, w - 1, h) == 3) 
+				&& (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1 || getArrayValue(maze, w + 1, h) == 3)
+				&& (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1 || getArrayValue(maze, w, h - 1) == 3)
+				&& (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1 || getArrayValue(maze, w, h + 1) == 3));
+	}
+	
+	/**
+	 * Fills the area between the given two corridor points (not array indexes!) with the given value, walls included
+	 * @param maze the array to process
+	 * @param w1 the x-coordinate or the w-position of the first cell
+	 * @param h1 the y-coordinate or the h-position of the first cell
+	 * @param w2 the x-coordinate or the w-position of the second cell
+	 * @param h2 the y-coordinate or the h-position of the second cell
+	 * @param val the value to write
+	 */
+	private static void fillArea(byte[][] maze, int w1, int h1, int w2, int h2, byte value){
+		boolean w2Bigger = w2 > w1;
+		boolean h2Bigger = h2 > h1;
+		for(int h = h1; (h2Bigger && h <= h2) || (!h2Bigger && h >= h2); h += (h2Bigger) ? 1 : -1){
+			for(int w = w1; (w2Bigger && w <= w2) || (!w2Bigger && w >= w2); w += (w2Bigger) ? 1 : -1){
+				if(w != w2)
+				writeBetween(maze, w, h, w + ((w2Bigger) ? 1 : -1), h, (byte) 3);
+				if(h != h2)
+				writeBetween(maze, w, h, w, h + ((h2Bigger) ? 1 : -1), (byte) 3);
+				if(h != h2 && w != w2)
+				writeBetween(maze, w, h, w + ((w2Bigger) ? 1 : -1), h + ((h2Bigger) ? 1 : -1), value);
+				writeToMazeRarray(maze, w, h, (byte) 3); 
+			}
+		}
+	}
+	
+	/**
+	 * Flood fills the given array, replacing one value with another.
+	 * @param array the array to flood fill
+	 * @param x the starting x-coordinate of the flood fill
+	 * @param y the starting y-coordinate of the flood fill
+	 * @param toReplace the value to be replaced
+	 * @param value the value to replace with
+	 */
+	private static void floodFill(byte[][] array, int x, int y, byte toReplace, byte value){
+		if (array[x][y] != toReplace) return;
+		array[x][y] = value;
+		if(x > 0) floodFill(array, x - 1, y, toReplace, value);
+		if(x < array.length - 1) floodFill(array, x + 1, y, toReplace, value);
+		if(y > 0) floodFill(array, x, y - 1, toReplace, value);
+		if(y < array[0].length - 1) floodFill(array, x, y + 1, toReplace, value);
+	}
+	
+	/**
+	 * Replaces parts of the maze with room tiles. (room tile id = 3)
+	 * @param array the array to perform the operation on.
+	 * @param iterations how many times to try place a room
+	 * @param maxDim the maximum possible width / height of a room.
+	 */
+	private static void fillWithRooms(byte[][] array, int iterations, int maxDim){
+		int arrayWidthCorridors = (array.length - 1) / 2;
+		int arrayHeightCorridors = (array[0].length - 1) / 2;
+		for(int i = 0; i < iterations; i++){
+			int sourceX = random.nextInt(arrayWidthCorridors);
+			int sourceY = random.nextInt(arrayHeightCorridors);
+			int targetX = sourceX + (random.nextInt(maxDim) - maxDim / 2);
+			int targetY = sourceY + (random.nextInt(maxDim) - maxDim / 2);
+			if(targetX < 0) targetX = 0;
+			if(targetY < 0) targetY = 0;
+			if(targetX >= arrayWidthCorridors) targetX = arrayWidthCorridors - 1;
+			if(targetY >= arrayHeightCorridors) targetY = arrayHeightCorridors - 1;
+			fillArea(array, sourceX, sourceY, targetX, targetY, (byte) 3);
+		}
+	}
+	
+	/**
+	 * Checks if the cell connects other cells of valueA and valueB
+	 * @param array the array to perform the operation on
+	 * @param x the x-coordinate of the cell to check
+	 * @param y the y-coordinate of the cell to check
+	 * @param valA the first value the cell has to touch
+	 * @param valB the second value the cell has to touch
+	 * @return whether the cell touches other cells of both types
+	 */
+	private static boolean isConnector(byte[][] array, int x, int y, byte valA, byte valB){
+		boolean hasValA = false;
+		boolean hasValB = false;
+		if(x > 0) {
+			hasValA |= array[x - 1][y] == valA;
+			hasValB |= array[x - 1][y] == valB;
+		}
+		if(x < array.length - 1) {
+			hasValA |= array[x + 1][y] == valA;
+			hasValB |= array[x + 1][y] == valB;
+		}
+		if(y > 0) {
+			hasValA |= array[x][y - 1] == valA;
+			hasValB |= array[x][y - 1] == valB;
+		}
+		if(y < array[0].length - 1) {
+			hasValA |= array[x][y + 1] == valA;
+			hasValB |= array[x][y + 1] == valB;
+		}
+		return hasValA && hasValB;
+	}
+	
+	/**
+	 * Finds areas with room tiles, and if they are adjacent to empty corridors, connects them and also marks them as empty space.
+	 * @param array the array to perform the operation on.
+	 */
+	private static void connectPassages(byte[][] array){
+		for(int h = 0; h < array[0].length; h ++){
+			for(int w = 0; w < array.length; w ++){
+				if(isConnector(array, w, h, (byte) 3, (byte) 2)){
+					array[w][h] = 3;
+					floodFill(array, w, h, (byte) 3, (byte) 2); 
+				}
+			}
+		}
 	}
 	
 	public static void main(String[] args) {
@@ -168,6 +306,14 @@ public class MazeGenerator {
 		System.out.println("Generating Recursive Backtracker Maze");
 		long millis = System.currentTimeMillis();
 		printMazeArray(generateRecursiveBacktrackerMaze(10, 10));
+		System.out.println("Operation Took " + (System.currentTimeMillis() - millis) + " millis");
+		System.out.println("Generating Recursive Backtracker Maze With Rooms");
+		millis = System.currentTimeMillis();
+		byte[][] testMaze = newBlankWalledArray(30, 30);
+		fillWithRooms(testMaze, 30, 10);
+		generateRecursiveBacktrackerMaze(testMaze);
+		connectPassages(testMaze);
+		printMazeArray(testMaze);
 		System.out.println("Operation Took " + (System.currentTimeMillis() - millis) + " millis");
 	}
 	
