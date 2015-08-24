@@ -216,6 +216,14 @@ public class MazeGenerator {
 		}
 	}
 	
+	/**
+	 * Flood fills the given array, replacing one value with another.
+	 * @param array the array to flood fill
+	 * @param x the starting x-coordinate of the flood fill
+	 * @param y the starting y-coordinate of the flood fill
+	 * @param toReplace the value to be replaced
+	 * @param value the value to replace with
+	 */
 	private static void floodFill(byte[][] array, int x, int y, byte toReplace, byte value){
 		if (array[x][y] != toReplace) return;
 		array[x][y] = value;
@@ -225,6 +233,12 @@ public class MazeGenerator {
 		if(y < array[0].length - 1) floodFill(array, x, y + 1, toReplace, value);
 	}
 	
+	/**
+	 * Replaces parts of the maze with room tiles. (room tile id = 3)
+	 * @param array the array to perform the operation on.
+	 * @param iterations how many times to try place a room
+	 * @param maxDim the maximum possible width / height of a room.
+	 */
 	private static void fillWithRooms(byte[][] array, int iterations, int maxDim){
 		int arrayWidthCorridors = (array.length - 1) / 2;
 		int arrayHeightCorridors = (array[0].length - 1) / 2;
@@ -241,6 +255,15 @@ public class MazeGenerator {
 		}
 	}
 	
+	/**
+	 * Checks if the cell connects other cells of valueA and valueB
+	 * @param array the array to perform the operation on
+	 * @param x the x-coordinate of the cell to check
+	 * @param y the y-coordinate of the cell to check
+	 * @param valA the first value the cell has to touch
+	 * @param valB the second value the cell has to touch
+	 * @return whether the cell touches other cells of both types
+	 */
 	private static boolean isConnector(byte[][] array, int x, int y, byte valA, byte valB){
 		boolean hasValA = false;
 		boolean hasValB = false;
@@ -263,6 +286,10 @@ public class MazeGenerator {
 		return hasValA && hasValB;
 	}
 	
+	/**
+	 * Finds areas with room tiles, and if they are adjacent to empty corridors, connects them and also marks them as empty space.
+	 * @param array the array to perform the operation on.
+	 */
 	private static void connectPassages(byte[][] array){
 		for(int h = 0; h < array[0].length; h ++){
 			for(int w = 0; w < array.length; w ++){
