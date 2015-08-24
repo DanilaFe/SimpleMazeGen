@@ -310,7 +310,7 @@ public class MazeGenerator {
 		System.out.println("Generating Recursive Backtracker Maze With Rooms");
 		millis = System.currentTimeMillis();
 		byte[][] testMaze = newBlankWalledArray(30, 30);
-		fillWithRooms(testMaze, 30, 10);
+		fillWithRooms(testMaze, 50, 11);
 		generateRecursiveBacktrackerMaze(testMaze);
 		connectPassages(testMaze);
 		printMazeArray(testMaze);
