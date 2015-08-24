@@ -30,3 +30,5 @@ Generating Recursive Backtracker Maze
 # # # # # # # # # # # # # # # # # # # # # 
 Operation Took 13 millis
 ```
+## Current Algorithms
+This generator currently only uses the recursive backtracker algorithm but I'm planning on adding more.
