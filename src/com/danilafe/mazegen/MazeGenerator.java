@@ -14,6 +14,17 @@ public class MazeGenerator {
 		
 	}
 	
+	private static byte[][] newBlankWalledArray(int width, int height){
+		byte[][] mazeArray = new byte[width * 2 + 1][height * 2 + 1];
+		for(int i = 0; i < mazeArray.length; i++){
+			for(int j = 0; j < mazeArray[0].length; j++){
+				mazeArray[i][j] = ((i % 2 == 1) && (j % 2 == 1)) ? (byte) 1 : (byte) 0;
+			}
+		}
+		return mazeArray;
+	}
+	
+	
 	/**
 	 * Generates a new maze using the Recursive Backtracker algorithm. 
 	 * @param width the width of the generated maze, in "corridors" - walls don't count as part of the width.
@@ -21,12 +32,7 @@ public class MazeGenerator {
 	 * @return the generated array of bytes. 0 means wall, 1 means unvisited and 2 means empty.
 	 */
 	public static byte[][] generateRecursiveBacktrackerMaze(int width, int height){
-		byte[][] mazeArray = new byte[width * 2 + 1][height * 2 + 1];
-		for(int i = 0; i < mazeArray.length; i++){
-			for(int j = 0; j < mazeArray[0].length; j++){
-				mazeArray[i][j] = ((i % 2 == 1) && (j % 2 == 1)) ? (byte) 1 : (byte) 0;
-			}
-		}
+		byte[][] mazeArray = newBlankWalledArray(width, height);
 		
 		generateRecursiveBacktrackerMaze(mazeArray);
 		
@@ -185,6 +191,15 @@ public class MazeGenerator {
 				&& (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1 || getArrayValue(maze, w, h + 1) == 3));
 	}
 	
+	/**
+	 * Fills the area between the given two corridor points (not array indexes!) with the given value, walls included
+	 * @param maze the array to process
+	 * @param w1 the x-coordinate or the w-position of the first cell
+	 * @param h1 the y-coordinate or the h-position of the first cell
+	 * @param w2 the x-coordinate or the w-position of the second cell
+	 * @param h2 the y-coordinate or the h-position of the second cell
+	 * @param val the value to write
+	 */
 	private static void fillArea(byte[][] maze, int w1, int h1, int w2, int h2, byte value){
 		boolean w2Bigger = w2 > w1;
 		boolean h2Bigger = h2 > h1;
@@ -197,6 +212,64 @@ public class MazeGenerator {
 				if(h != h2 && w != w2)
 				writeBetween(maze, w, h, w + ((w2Bigger) ? 1 : -1), h + ((h2Bigger) ? 1 : -1), value);
 				writeToMazeRarray(maze, w, h, (byte) 3); 
+			}
+		}
+	}
+	
+	private static void floodFill(byte[][] array, int x, int y, byte toReplace, byte value){
+		if (array[x][y] != toReplace) return;
+		array[x][y] = value;
+		if(x > 0) floodFill(array, x - 1, y, toReplace, value);
+		if(x < array.length - 1) floodFill(array, x + 1, y, toReplace, value);
+		if(y > 0) floodFill(array, x, y - 1, toReplace, value);
+		if(y < array[0].length - 1) floodFill(array, x, y + 1, toReplace, value);
+	}
+	
+	private static void fillWithRooms(byte[][] array, int iterations, int maxDim){
+		int arrayWidthCorridors = (array.length - 1) / 2;
+		int arrayHeightCorridors = (array[0].length - 1) / 2;
+		for(int i = 0; i < iterations; i++){
+			int sourceX = random.nextInt(arrayWidthCorridors);
+			int sourceY = random.nextInt(arrayHeightCorridors);
+			int targetX = sourceX + (random.nextInt(maxDim) - maxDim / 2);
+			int targetY = sourceY + (random.nextInt(maxDim) - maxDim / 2);
+			if(targetX < 0) targetX = 0;
+			if(targetY < 0) targetY = 0;
+			if(targetX >= arrayWidthCorridors) targetX = arrayWidthCorridors - 1;
+			if(targetY >= arrayHeightCorridors) targetY = arrayHeightCorridors - 1;
+			fillArea(array, sourceX, sourceY, targetX, targetY, (byte) 3);
+		}
+	}
+	
+	private static boolean isConnector(byte[][] array, int x, int y, byte valA, byte valB){
+		boolean hasValA = false;
+		boolean hasValB = false;
+		if(x > 0) {
+			hasValA |= array[x - 1][y] == valA;
+			hasValB |= array[x - 1][y] == valB;
+		}
+		if(x < array.length - 1) {
+			hasValA |= array[x + 1][y] == valA;
+			hasValB |= array[x + 1][y] == valB;
+		}
+		if(y > 0) {
+			hasValA |= array[x][y - 1] == valA;
+			hasValB |= array[x][y - 1] == valB;
+		}
+		if(y < array[0].length - 1) {
+			hasValA |= array[x][y + 1] == valA;
+			hasValB |= array[x][y + 1] == valB;
+		}
+		return hasValA && hasValB;
+	}
+	
+	private static void connectPassages(byte[][] array){
+		for(int h = 0; h < array[0].length; h ++){
+			for(int w = 0; w < array.length; w ++){
+				if(isConnector(array, w, h, (byte) 3, (byte) 2)){
+					array[w][h] = 3;
+					floodFill(array, w, h, (byte) 3, (byte) 2); 
+				}
 			}
 		}
 	}
