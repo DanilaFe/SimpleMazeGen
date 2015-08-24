@@ -280,6 +280,14 @@ public class MazeGenerator {
 		long millis = System.currentTimeMillis();
 		printMazeArray(generateRecursiveBacktrackerMaze(10, 10));
 		System.out.println("Operation Took " + (System.currentTimeMillis() - millis) + " millis");
+		System.out.println("Generating Recursive Backtracker Maze With Rooms");
+		millis = System.currentTimeMillis();
+		byte[][] testMaze = newBlankWalledArray(30, 30);
+		fillWithRooms(testMaze, 30, 10);
+		generateRecursiveBacktrackerMaze(testMaze);
+		connectPassages(testMaze);
+		printMazeArray(testMaze);
+		System.out.println("Operation Took " + (System.currentTimeMillis() - millis) + " millis");
 	}
 	
 }
