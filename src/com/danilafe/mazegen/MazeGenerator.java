@@ -305,8 +305,8 @@ public class MazeGenerator {
 		for(int h = 0; h < array[0].length; h ++){
 			for(int w = 0; w < array.length; w ++){
 				if(isConnector(array, w, h, valA, valB)){
-					array[w][h] = valA;
-					floodFill(array, w, h, valA, valB); 
+					array[w][h] = valB;
+					floodFill(array, w, h, valB, valA); 
 				}
 			}
 		}
