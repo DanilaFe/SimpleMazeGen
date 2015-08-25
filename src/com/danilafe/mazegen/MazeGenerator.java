@@ -322,6 +322,10 @@ public class MazeGenerator {
 		return contains;
 	}
 	
+	public static void setSeed(long seed){
+		random.setSeed(seed);
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Running Tests");
 		System.out.println("Generating Recursive Backtracker Maze");
