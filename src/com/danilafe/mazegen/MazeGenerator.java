@@ -292,11 +292,21 @@ public class MazeGenerator {
 	 * @param array the array to perform the operation on.
 	 */
 	public static void connectPassages(byte[][] array){
+		connectValues(array, (byte) 2, (byte) 3);
+	}
+	
+	/**
+	 * Generic method to connect two different tile IDS
+	 * @param array the array to perform the operation on
+	 * @param valA the first value to connect
+	 * @param valB the second value to connect
+	 */
+	public static void connectValues(byte[][] array, byte valA, byte valB){
 		for(int h = 0; h < array[0].length; h ++){
 			for(int w = 0; w < array.length; w ++){
-				if(isConnector(array, w, h, (byte) 3, (byte) 2)){
-					array[w][h] = 3;
-					floodFill(array, w, h, (byte) 3, (byte) 2); 
+				if(isConnector(array, w, h, valA, valB)){
+					array[w][h] = valA;
+					floodFill(array, w, h, valA, valB); 
 				}
 			}
 		}
@@ -321,7 +331,7 @@ public class MazeGenerator {
 		System.out.println("Generating Recursive Backtracker Maze With Rooms");
 		millis = System.currentTimeMillis();
 		byte[][] testMaze = newBlankWalledArray(30, 30);
-		fillWithRooms(testMaze, 75, 11);
+		fillWithRooms(testMaze, 30, 15);
 		generateRecursiveBacktrackerMaze(testMaze);
 		connectPassages(testMaze);
 		printMazeArray(testMaze);
