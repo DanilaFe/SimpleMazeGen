@@ -55,14 +55,15 @@ public class MazeGenerator {
 		int height = (mazeArray[0].length - 1) / 2;
 		int[] cursorPos;
 		do {
-			cursorPos = new int[]{
-					random.nextInt(width),
-					random.nextInt(height)
-				};
-		} while (getArrayValue(mazeArray, cursorPos[0], cursorPos[1]) != 1);
-		
-		
-		backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height);
+			do {
+				cursorPos = new int[]{
+						random.nextInt(width),
+						random.nextInt(height)
+					};
+			} while (getArrayValue(mazeArray, cursorPos[0], cursorPos[1]) != 1);
+			
+			backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height);
+		} while(containsValue(mazeArray, (byte) 1));
 	}
 	
 	/**
@@ -301,6 +302,16 @@ public class MazeGenerator {
 		}
 	}
 	
+	private static boolean containsValue(byte[][] array, byte value){
+		boolean contains = false;
+		for(int w = 0; w < array.length; w++){
+			for(int h = 0; h < array[0].length; h++){
+				contains |= array[w][h] == value;
+			}
+		}
+		return contains;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Running Tests");
 		System.out.println("Generating Recursive Backtracker Maze");
@@ -310,7 +321,7 @@ public class MazeGenerator {
 		System.out.println("Generating Recursive Backtracker Maze With Rooms");
 		millis = System.currentTimeMillis();
 		byte[][] testMaze = newBlankWalledArray(30, 30);
-		fillWithRooms(testMaze, 50, 11);
+		fillWithRooms(testMaze, 75, 11);
 		generateRecursiveBacktrackerMaze(testMaze);
 		connectPassages(testMaze);
 		printMazeArray(testMaze);
