@@ -242,7 +242,7 @@ public class MazeGenerator {
 	 * @param iterations how many times to try place a room
 	 * @param maxDim the maximum possible width / height of a room.
 	 */
-	public static void fillWithRooms(byte[][] array, int iterations, int maxDim){
+	public static void fillWithRooms(byte[][] array, int iterations, int maxDim, boolean allowIntersection){
 		int arrayWidthCorridors = (array.length - 1) / 2;
 		int arrayHeightCorridors = (array[0].length - 1) / 2;
 		ArrayList<Rectangle> rectangles = new ArrayList<Rectangle>();
@@ -275,6 +275,7 @@ public class MazeGenerator {
 					System.out.println(" " + otherRect.toString());
 					intersects |= (otherRect.intersects(rectangle));
 				}
+				if(allowIntersection) intersects = false;
 			} while (intersects);
 			
 			rectangles.add(rectangle);
@@ -362,7 +363,7 @@ public class MazeGenerator {
 		System.out.println("Generating Recursive Backtracker Maze With Rooms");
 		millis = System.currentTimeMillis();
 		byte[][] testMaze = newBlankWalledArray(30, 30);
-		fillWithRooms(testMaze, 30, 15);
+		fillWithRooms(testMaze, 30, 15, true);
 		generateRecursiveBacktrackerMaze(testMaze);
 		connectPassages(testMaze);
 		printMazeArray(testMaze);
