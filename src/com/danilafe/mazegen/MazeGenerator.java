@@ -269,10 +269,7 @@ public class MazeGenerator {
 				int rectHeight = Math.abs(targetY - sourceY);
 				rectangle = new Rectangle(rectPointX - 1, rectPointY - 1, rectWidth + 1, rectHeight + 1);
 				intersects = false;
-				System.out.println("Checking " + rectangle.toString());
-				System.out.println("Against: ");
 				for(Rectangle otherRect : rectangles){
-					System.out.println(" " + otherRect.toString());
 					intersects |= (otherRect.intersects(rectangle));
 				}
 				if(allowIntersection) intersects = false;
