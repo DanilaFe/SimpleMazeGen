@@ -1,5 +1,8 @@
 package com.danilafe.mazegen;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -349,6 +352,19 @@ public class MazeGenerator {
 	
 	public static void setSeed(long seed){
 		random.setSeed(seed);
+	}
+	
+	public static BufferedImage generateMazeImage(byte[][] mazeArray, int cellWidth, int cellHeight, Color wallColor, Color emptyColor){
+		BufferedImage bufferedImage = new BufferedImage(mazeArray.length * cellWidth, mazeArray[0].length * cellHeight, BufferedImage.TYPE_INT_RGB);
+		Graphics2D graphics = bufferedImage.createGraphics();
+		for(int i = 0; i < mazeArray.length; i++){
+			for(int j = 0; j < mazeArray[0].length; j ++){
+				Color toUse = (mazeArray[i][j] == 0) ? wallColor : emptyColor;
+				graphics.setColor(toUse);
+				graphics.fillRect(i * cellWidth, j * cellHeight, cellWidth, cellHeight);
+			}
+		}
+		return bufferedImage;
 	}
 	
 	public static void main(String[] args) {
