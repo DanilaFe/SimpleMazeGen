@@ -1,4 +1,6 @@
 package com.danilafe.mazegen;
+import java.awt.Rectangle;
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -243,15 +245,40 @@ public class MazeGenerator {
 	public static void fillWithRooms(byte[][] array, int iterations, int maxDim){
 		int arrayWidthCorridors = (array.length - 1) / 2;
 		int arrayHeightCorridors = (array[0].length - 1) / 2;
+		ArrayList<Rectangle> rectangles = new ArrayList<Rectangle>();
 		for(int i = 0; i < iterations; i++){
-			int sourceX = random.nextInt(arrayWidthCorridors);
-			int sourceY = random.nextInt(arrayHeightCorridors);
-			int targetX = sourceX + (random.nextInt(maxDim) - maxDim / 2);
-			int targetY = sourceY + (random.nextInt(maxDim) - maxDim / 2);
-			if(targetX < 0) targetX = 0;
-			if(targetY < 0) targetY = 0;
-			if(targetX >= arrayWidthCorridors) targetX = arrayWidthCorridors - 1;
-			if(targetY >= arrayHeightCorridors) targetY = arrayHeightCorridors - 1;
+			boolean intersects = true;
+			int sourceX;
+			int sourceY;
+			int targetX;
+			int targetY;
+			Rectangle rectangle;
+			do {
+				sourceX = random.nextInt(arrayWidthCorridors);
+				sourceY = random.nextInt(arrayHeightCorridors);
+				targetX = sourceX + (random.nextInt(maxDim) - maxDim / 2);
+				targetY = sourceY + (random.nextInt(maxDim) - maxDim / 2);
+				if(targetX < 0) targetX = 0;
+				if(targetY < 0) targetY = 0;
+				if(targetX >= arrayWidthCorridors) targetX = arrayWidthCorridors - 1;
+				if(targetY >= arrayHeightCorridors) targetY = arrayHeightCorridors - 1;
+				
+				int rectPointX = (sourceX < targetX) ? sourceX : targetX;
+				int rectPointY = (sourceY < targetY) ? sourceY : targetY;
+				int rectWidth = Math.abs(targetX - sourceX);
+				int rectHeight = Math.abs(targetY - sourceY);
+				rectangle = new Rectangle(rectPointX - 1, rectPointY - 1, rectWidth + 1, rectHeight + 1);
+				intersects = false;
+				System.out.println("Checking " + rectangle.toString());
+				System.out.println("Against: ");
+				for(Rectangle otherRect : rectangles){
+					System.out.println(" " + otherRect.toString());
+					intersects |= (otherRect.intersects(rectangle));
+				}
+			} while (intersects);
+			
+			rectangles.add(rectangle);
+			
 			fillArea(array, sourceX, sourceY, targetX, targetY, (byte) 3);
 		}
 	}
