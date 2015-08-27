@@ -67,7 +67,7 @@ public class MazeGenerator {
 					};
 			} while (getArrayValue(mazeArray, cursorPos[0], cursorPos[1]) != 1);
 			
-			backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height);
+			backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height, 0, 256, cursorPos);
 		} while(containsValue(mazeArray, (byte) 1));
 	}
 	
@@ -88,7 +88,8 @@ public class MazeGenerator {
 	 * @param mazeWidth the width of the maze being generated.
 	 * @param mazeHeight the height of the maze being generated.
 	 */
-	private static void backtrack(byte[][] array, int pos_x, int pos_y, int pos_prevx, int pos_prevy, int mazeWidth, int mazeHeight){
+
+	private static boolean backtrack(final byte[][] array, final int pos_x, final int pos_y, final int pos_prevx, final int pos_prevy, final int mazeWidth, final int mazeHeight, final int currentSize, final int maxSize, final int[] lastCell){
 		writeBetween(array, pos_x, pos_y, pos_prevx, pos_prevy, (byte) 2); 
 		writeToMazeRarray(array, pos_x, pos_y, (byte) 2);
 		while(!isSurrounded(array, pos_x, pos_y)){
@@ -114,10 +115,14 @@ public class MazeGenerator {
 			}
 			if((newCheckPos[0] < 0) || (newCheckPos[0] > mazeWidth - 1) || (newCheckPos[1] < 0) || (newCheckPos[1] > mazeHeight - 1)) continue;
 			if(getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 2 && getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 3){
-				backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight);
+				if(backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight, currentSize + 1, maxSize, lastCell)){
+					return true;
+				}
 			}
 			
 		}
+		
+		return false;
 	}
 	
 	/**
