@@ -115,6 +115,11 @@ public class MazeGenerator {
 			}
 			if((newCheckPos[0] < 0) || (newCheckPos[0] > mazeWidth - 1) || (newCheckPos[1] < 0) || (newCheckPos[1] > mazeHeight - 1)) continue;
 			if(getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 2 && getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 3){
+				if(currentSize == maxSize){
+					lastCell[0] = pos_x;
+					lastCell[1] = pos_y;
+					return true;
+				}
 				if(backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight, currentSize + 1, maxSize, lastCell)){
 					return true;
 				}
