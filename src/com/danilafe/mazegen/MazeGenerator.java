@@ -240,13 +240,30 @@ public class MazeGenerator {
 	 * @param toReplace the value to be replaced
 	 * @param value the value to replace with
 	 */
-	private static void floodFill(byte[][] array, int x, int y, byte toReplace, byte value){
-		if (array[x][y] != toReplace) return;
+	private static boolean floodFill(byte[][] array, int x, int y, byte toReplace, byte value, int current, int maxStack, int[] lastCell){
+		if (array[x][y] != toReplace) return false;
 		array[x][y] = value;
-		if(x > 0) floodFill(array, x - 1, y, toReplace, value);
-		if(x < array.length - 1) floodFill(array, x + 1, y, toReplace, value);
-		if(y > 0) floodFill(array, x, y - 1, toReplace, value);
-		if(y < array[0].length - 1) floodFill(array, x, y + 1, toReplace, value);
+		if(x > 0) if(current == maxStack) {
+			lastCell[0] = x - 1;
+			lastCell[1] = y;
+			return true; 
+		} else floodFill(array, x - 1, y, toReplace, value, current + 1, maxStack, lastCell);
+		if(x < array.length - 1) if(current == maxStack) {
+			lastCell[0] = x + 1;
+			lastCell[1] = y;
+			return true;
+		} else floodFill(array, x + 1, y, toReplace, value, current + 1, maxStack, lastCell);
+		if(y > 0) if(current == maxStack) {
+			lastCell[0] = x;
+			lastCell[1] = y - 1;
+			return true;
+		} else floodFill(array, x, y - 1, toReplace, value, current + 1, maxStack, lastCell);
+		if(y < array[0].length - 1) if(current == maxStack) {
+			lastCell[0] = x;
+			lastCell[1] = y + 1;
+			return true; 
+		} else floodFill(array, x, y + 1, toReplace, value, current + 1, maxStack, lastCell);
+		return false;
 	}
 	
 	/**
@@ -344,7 +361,11 @@ public class MazeGenerator {
 			for(int w = 0; w < array.length; w ++){
 				if(isConnector(array, w, h, valA, valB)){
 					array[w][h] = valB;
-					floodFill(array, w, h, valB, valA); 
+					int[] lastCell = new int[]{
+						w,
+						h
+					};
+					floodFill(array, lastCell[0], lastCell[1], valB, valA, 0, 256, lastCell); 
 				}
 			}
 		}
@@ -385,7 +406,7 @@ public class MazeGenerator {
 		System.out.println("Operation Took " + (System.currentTimeMillis() - millis) + " millis");
 		System.out.println("Generating Recursive Backtracker Maze With Rooms");
 		millis = System.currentTimeMillis();
-		byte[][] testMaze = newBlankWalledArray(30, 30);
+		byte[][] testMaze = newBlankWalledArray(300, 300);
 		fillWithRooms(testMaze, 30, 15, true);
 		generateRecursiveBacktrackerMaze(testMaze);
 		connectPassages(testMaze);
