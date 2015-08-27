@@ -154,7 +154,7 @@ public class MazeGenerator {
 	 * @param h the y-coordinate or the h-position of where to write
 	 * @param val the value to write
 	 */
-	private static void writeToMazeRarray(byte[][] maze, int w, int h, byte val){
+	private synchronized static void writeToMazeRarray(byte[][] maze, int w, int h, byte val){
 		maze[w * 2 + 1][h * 2 + 1] = val;
 	}
 	
@@ -167,7 +167,7 @@ public class MazeGenerator {
 	 * @param h2 the y-coordinate or the h-position of the second cell
 	 * @param val the value to write
 	 */
-	private static void writeBetween(byte[][] maze, int w1, int h1, int w2, int h2, byte val){
+	private synchronized static void writeBetween(byte[][] maze, int w1, int h1, int w2, int h2, byte val){
 		maze[((w1 * 2 + 1) + (w2 * 2 + 1)) / 2][((h1 * 2 + 1) + (h2 * 2 + 1)) / 2] = val;
 	}
 	
@@ -178,7 +178,7 @@ public class MazeGenerator {
 	 * @param h the y-coordinate or the h-position of where to read
 	 * @return
 	 */
-	private static byte getArrayValue(byte[][] maze, int w, int h){
+	private synchronized static byte getArrayValue(byte[][] maze, int w, int h){
 		if((w < 0) || (w > ((maze.length - 1) / 2) - 1) || (h < 0) || (h > ((maze[0].length - 1) / 2) - 1)) return - 1;
 		return maze[w * 2 + 1][h * 2 + 1];
 	}
@@ -190,7 +190,7 @@ public class MazeGenerator {
 	 * @param h the y-coordinate or the h-position of the potentially surround cell
 	 * @return
 	 */
-	private static boolean isSurrounded(byte[][] maze, int w, int h){
+	private synchronized static boolean isSurrounded(byte[][] maze, int w, int h){
 		return ((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1 || getArrayValue(maze, w - 1, h) == 3) 
 				&& (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1 || getArrayValue(maze, w + 1, h) == 3)
 				&& (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1 || getArrayValue(maze, w, h - 1) == 3)
@@ -206,7 +206,7 @@ public class MazeGenerator {
 	 * @param h2 the y-coordinate or the h-position of the second cell
 	 * @param val the value to write
 	 */
-	private static void fillArea(byte[][] maze, int w1, int h1, int w2, int h2, byte value){
+	private synchronized static void fillArea(byte[][] maze, int w1, int h1, int w2, int h2, byte value){
 		boolean w2Bigger = w2 > w1;
 		boolean h2Bigger = h2 > h1;
 		for(int h = h1; (h2Bigger && h <= h2) || (!h2Bigger && h >= h2); h += (h2Bigger) ? 1 : -1){
@@ -230,7 +230,7 @@ public class MazeGenerator {
 	 * @param toReplace the value to be replaced
 	 * @param value the value to replace with
 	 */
-	private static void floodFill(byte[][] array, int x, int y, byte toReplace, byte value){
+	private synchronized static void floodFill(byte[][] array, int x, int y, byte toReplace, byte value){
 		if (array[x][y] != toReplace) return;
 		array[x][y] = value;
 		if(x > 0) floodFill(array, x - 1, y, toReplace, value);
@@ -245,7 +245,7 @@ public class MazeGenerator {
 	 * @param iterations how many times to try place a room
 	 * @param maxDim the maximum possible width / height of a room.
 	 */
-	public static void fillWithRooms(byte[][] array, int iterations, int maxDim, boolean allowIntersection){
+	public synchronized static void fillWithRooms(byte[][] array, int iterations, int maxDim, boolean allowIntersection){
 		int arrayWidthCorridors = (array.length - 1) / 2;
 		int arrayHeightCorridors = (array[0].length - 1) / 2;
 		ArrayList<Rectangle> rectangles = new ArrayList<Rectangle>();
@@ -293,7 +293,7 @@ public class MazeGenerator {
 	 * @param valB the second value the cell has to touch
 	 * @return whether the cell touches other cells of both types
 	 */
-	private static boolean isConnector(byte[][] array, int x, int y, byte valA, byte valB){
+	private synchronized static boolean isConnector(byte[][] array, int x, int y, byte valA, byte valB){
 		boolean hasValA = false;
 		boolean hasValB = false;
 		if(x > 0) {
@@ -314,12 +314,12 @@ public class MazeGenerator {
 		}
 		return hasValA && hasValB;
 	}
-	
+
 	/**
 	 * Finds areas with room tiles, and if they are adjacent to empty corridors, connects them and also marks them as empty space.
 	 * @param array the array to perform the operation on.
 	 */
-	public static void connectPassages(byte[][] array){
+	public synchronized static void connectPassages(byte[][] array){
 		connectValues(array, (byte) 2, (byte) 3);
 	}
 	
@@ -329,7 +329,7 @@ public class MazeGenerator {
 	 * @param valA the first value to connect
 	 * @param valB the second value to connect
 	 */
-	public static void connectValues(byte[][] array, byte valA, byte valB){
+	public synchronized static void connectValues(byte[][] array, byte valA, byte valB){
 		for(int h = 0; h < array[0].length; h ++){
 			for(int w = 0; w < array.length; w ++){
 				if(isConnector(array, w, h, valA, valB)){
@@ -340,7 +340,7 @@ public class MazeGenerator {
 		}
 	}
 	
-	private static boolean containsValue(byte[][] array, byte value){
+	private synchronized static boolean containsValue(byte[][] array, byte value){
 		boolean contains = false;
 		for(int w = 0; w < array.length; w++){
 			for(int h = 0; h < array[0].length; h++){
@@ -350,11 +350,12 @@ public class MazeGenerator {
 		return contains;
 	}
 	
-	public static void setSeed(long seed){
+	public synchronized static void setSeed(long seed){
 		random.setSeed(seed);
 	}
 	
-	public static BufferedImage generateMazeImage(byte[][] mazeArray, int cellWidth, int cellHeight, Color wallColor, Color emptyColor){
+	
+	public synchronized static BufferedImage generateMazeImage(byte[][] mazeArray, int cellWidth, int cellHeight, Color wallColor, Color emptyColor){
 		BufferedImage bufferedImage = new BufferedImage(mazeArray.length * cellWidth, mazeArray[0].length * cellHeight, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graphics = bufferedImage.createGraphics();
 		for(int i = 0; i < mazeArray.length; i++){
