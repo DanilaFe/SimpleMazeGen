@@ -14,6 +14,8 @@ import java.util.Random;
 public class MazeGenerator {
 
 	private static Random random = new Random();
+	private static final int MAX_THREADS = 8;
+	private static int threadCount = 0;
 	
 	private MazeGenerator(){
 		
@@ -88,12 +90,12 @@ public class MazeGenerator {
 	 * @param mazeWidth the width of the maze being generated.
 	 * @param mazeHeight the height of the maze being generated.
 	 */
-	private static void backtrack(byte[][] array, int pos_x, int pos_y, int pos_prevx, int pos_prevy, int mazeWidth, int mazeHeight){
+	private static void backtrack(final byte[][] array, final int pos_x, final int pos_y, final int pos_prevx, final int pos_prevy, final int mazeWidth, final int mazeHeight){
 		writeBetween(array, pos_x, pos_y, pos_prevx, pos_prevy, (byte) 2); 
 		writeToMazeRarray(array, pos_x, pos_y, (byte) 2);
 		while(!isSurrounded(array, pos_x, pos_y)){
 			int direction = random.nextInt(4);
-			int[] newCheckPos = new int[2];
+			final int[] newCheckPos = new int[2];
 			switch(direction){
 			case 0:
 				newCheckPos[0] = pos_x - 1;
@@ -114,6 +116,16 @@ public class MazeGenerator {
 			}
 			if((newCheckPos[0] < 0) || (newCheckPos[0] > mazeWidth - 1) || (newCheckPos[1] < 0) || (newCheckPos[1] > mazeHeight - 1)) continue;
 			if(getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 2 && getArrayValue(array, newCheckPos[0], newCheckPos[1]) != 3){
+				if(threadCount < MAX_THREADS){
+					threadCount += 1;
+					Thread backtrackThread = new Thread("Backtracking Thread " + threadCount){
+						public void run(){
+							backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight);
+							threadCount -= 1;
+						}
+					};
+					backtrackThread.start();
+				}
 				backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight);
 			}
 			
