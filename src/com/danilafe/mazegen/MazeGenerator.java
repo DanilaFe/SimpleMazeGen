@@ -37,10 +37,10 @@ public class MazeGenerator {
 	 * @param height the height of the generated maze, in "corridors" - walls don't count as part of the width.
 	 * @return the generated array of bytes. 0 means wall, 1 means unvisited and 2 means empty.
 	 */
-	public static byte[][] generateRecursiveBacktrackerMaze(int width, int height, byte wallid, byte emptyid, byte visitedid){
+	public static byte[][] generateRecursiveBacktrackerMaze(int width, int height, byte wallid, byte emptyid, byte visitedid, Byte[] safeTiles){
 		byte[][] mazeArray = newBlankWalledArray(width, height, wallid, emptyid);
 		
-		generateRecursiveBacktrackerMaze(mazeArray, wallid, emptyid, visitedid);
+		generateRecursiveBacktrackerMaze(mazeArray, wallid, emptyid, visitedid, safeTiles);
 		
 		return mazeArray;
 	}
@@ -56,7 +56,7 @@ public class MazeGenerator {
 	 * <tr><td># </td><td># </td><td># </td><td># </td><td># </td></tr>
 	 * </table>
 	 */
-	public static void generateRecursiveBacktrackerMaze(byte[][] mazeArray, byte wallid, byte emptyid, byte visitedid){
+	public static void generateRecursiveBacktrackerMaze(byte[][] mazeArray, byte wallid, byte emptyid, byte visitedid, Byte[] safeTiles){
 		int width = (mazeArray.length - 1) / 2;
 		int height = (mazeArray[0].length - 1) / 2;
 		int[] cursorPos;
@@ -68,7 +68,7 @@ public class MazeGenerator {
 					};
 			} while (getArrayValue(mazeArray, cursorPos[0], cursorPos[1]) != emptyid);
 			
-			backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height, 0, 256, cursorPos, emptyid, visitedid);
+			backtrack(mazeArray, cursorPos[0], cursorPos[1], cursorPos[0], cursorPos[1], width, height, 0, 256, cursorPos, emptyid, visitedid, safeTiles);
 		} while(containsValue(mazeArray, (byte) 1));
 	}
 	
@@ -90,10 +90,10 @@ public class MazeGenerator {
 	 * @param mazeHeight the height of the maze being generated.
 	 */
 
-	private static boolean backtrack(final byte[][] array, final int pos_x, final int pos_y, final int pos_prevx, final int pos_prevy, final int mazeWidth, final int mazeHeight, final int currentSize, final int maxSize, final int[] lastCell, byte useAsUnvisited, byte useAsCorridor){
+	private static boolean backtrack(final byte[][] array, final int pos_x, final int pos_y, final int pos_prevx, final int pos_prevy, final int mazeWidth, final int mazeHeight, final int currentSize, final int maxSize, final int[] lastCell, byte useAsUnvisited, byte useAsCorridor, Byte[] safeTiles){
 		writeBetween(array, pos_x, pos_y, pos_prevx, pos_prevy, (byte) useAsCorridor); 
 		writeToMazeRarray(array, pos_x, pos_y, (byte) useAsCorridor);
-		while(!isSurrounded(array, pos_x, pos_y)){
+		while(!isSurrounded(array, pos_x, pos_y, safeTiles)){
 			int direction = random.nextInt(4);
 			int[] newCheckPos = new int[2];
 			switch(direction){
@@ -121,7 +121,7 @@ public class MazeGenerator {
 					lastCell[1] = pos_y;
 					return true;
 				}
-				if(backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight, currentSize + 1, maxSize, lastCell, useAsUnvisited, useAsCorridor)){
+				if(backtrack(array, newCheckPos[0], newCheckPos[1], pos_x, pos_y, mazeWidth, mazeHeight, currentSize + 1, maxSize, lastCell, useAsUnvisited, useAsCorridor, safeTiles)){
 					return true;
 				}
 			}
@@ -150,6 +150,9 @@ public class MazeGenerator {
 					break;
 				case 3:
 					System.out.print("+");
+					break;
+				case 4:
+					System.out.print("-");
 					break;
 				}
 				System.out.print(" ");
@@ -201,11 +204,11 @@ public class MazeGenerator {
 	 * @param h the y-coordinate or the h-position of the potentially surround cell
 	 * @return
 	 */
-	private static boolean isSurrounded(byte[][] maze, int w, int h){
-		return ((getArrayValue(maze, w - 1, h) == 2 || getArrayValue(maze, w - 1, h) == -1 || getArrayValue(maze, w - 1, h) == 3) 
-				&& (getArrayValue(maze, w + 1, h) == 2 || getArrayValue(maze, w + 1, h) == -1 || getArrayValue(maze, w + 1, h) == 3)
-				&& (getArrayValue(maze, w, h - 1) == 2 || getArrayValue(maze, w, h - 1) == -1 || getArrayValue(maze, w, h - 1) == 3)
-				&& (getArrayValue(maze, w, h + 1) == 2 || getArrayValue(maze, w, h + 1) == -1 || getArrayValue(maze, w, h + 1) == 3));
+	private static boolean isSurrounded(byte[][] maze, int w, int h, Byte[] tiletypes){
+		return ((Arrays.asList(tiletypes).contains(getArrayValue(maze, w -1, h)) || getArrayValue(maze, w -1, h) == -1)
+				&& (Arrays.asList(tiletypes).contains(getArrayValue(maze, w +1, h)) || getArrayValue(maze, w +1, h) == -1)
+				&& (Arrays.asList(tiletypes).contains(getArrayValue(maze, w, h -1)) || getArrayValue(maze, w, h -1) == -1)
+				&& (Arrays.asList(tiletypes).contains(getArrayValue(maze, w, h +1)) || getArrayValue(maze, w, h +1) == -1));
 	}
 	
 	/**
@@ -223,12 +226,12 @@ public class MazeGenerator {
 		for(int h = h1; (h2Bigger && h <= h2) || (!h2Bigger && h >= h2); h += (h2Bigger) ? 1 : -1){
 			for(int w = w1; (w2Bigger && w <= w2) || (!w2Bigger && w >= w2); w += (w2Bigger) ? 1 : -1){
 				if(w != w2)
-				writeBetween(maze, w, h, w + ((w2Bigger) ? 1 : -1), h, (byte) 3);
+				writeBetween(maze, w, h, w + ((w2Bigger) ? 1 : -1), h, value);
 				if(h != h2)
-				writeBetween(maze, w, h, w, h + ((h2Bigger) ? 1 : -1), (byte) 3);
+				writeBetween(maze, w, h, w, h + ((h2Bigger) ? 1 : -1), value);
 				if(h != h2 && w != w2)
 				writeBetween(maze, w, h, w + ((w2Bigger) ? 1 : -1), h + ((h2Bigger) ? 1 : -1), value);
-				writeToMazeRarray(maze, w, h, (byte) 3); 
+				writeToMazeRarray(maze, w, h, value); 
 			}
 		}
 	}
@@ -273,10 +276,11 @@ public class MazeGenerator {
 	 * @param iterations how many times to try place a room
 	 * @param maxDim the maximum possible width / height of a room.
 	 */
-	public static ArrayList<Rectangle> fillWithRooms(byte[][] array, int iterations, int maxDim, boolean allowIntersection, byte roomid){
+	public static ArrayList<Rectangle> fillWithRooms(byte[][] array, int iterations, int maxDim, boolean allowIntersection, byte roomid, ArrayList<Rectangle> existingRects){
 		int arrayWidthCorridors = (array.length - 1) / 2;
 		int arrayHeightCorridors = (array[0].length - 1) / 2;
 		ArrayList<Rectangle> rectangles = new ArrayList<Rectangle>();
+		rectangles.addAll(existingRects);
 		for(int i = 0; i < iterations; i++){
 			boolean intersects = true;
 			int sourceX;
@@ -311,6 +315,10 @@ public class MazeGenerator {
 			fillArea(array, sourceX, sourceY, targetX, targetY, roomid);
 		}
 		return rectangles;
+	}
+	
+	public static ArrayList<Rectangle> fillWithRooms(byte[][] array, int iterations, int maxDim, boolean allowIntersection, byte roomid){
+		return fillWithRooms(array, iterations, maxDim, allowIntersection, roomid, new ArrayList<Rectangle>());
 	}
 	
 	/**
@@ -400,19 +408,40 @@ public class MazeGenerator {
 		return bufferedImage;
 	}
 	
+	public static Byte[] getByteWrapper(byte[] from){
+		Byte[] byteWrapper = new Byte[from.length];
+		for(int i = 0; i < byteWrapper.length; i++){
+			byteWrapper[i] = from[i];
+		}
+		return byteWrapper;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println("Running Tests");
 		System.out.println("Generating Recursive Backtracker Maze");
 		long millis = System.currentTimeMillis();
-		printMazeArray(generateRecursiveBacktrackerMaze(10, 10, (byte) 0, (byte) 1, (byte) 2));
+		printMazeArray(generateRecursiveBacktrackerMaze(10, 10, (byte) 0, (byte) 1, (byte) 2, getByteWrapper(new byte[]{
+				2, 3, 4
+		})));
 		System.out.println("Operation Took " + (System.currentTimeMillis() - millis) + " millis");
 		System.out.println("Generating Recursive Backtracker Maze With Rooms");
 		millis = System.currentTimeMillis();
 		byte[][] testMaze = newBlankWalledArray(30, 30, (byte) 0, (byte) 1);
 		fillWithRooms(testMaze, 30, 15, true, (byte) 3);
-		generateRecursiveBacktrackerMaze(testMaze, (byte) 0, (byte) 1, (byte) 2);
+		generateRecursiveBacktrackerMaze(testMaze, (byte) 0, (byte) 1, (byte) 2, getByteWrapper(new byte[]{
+				2, 3, 4
+		}));
 		connectPassages(testMaze);
-		printMazeArray(testMaze);
+		printMazeArray(testMaze);		
+		System.out.println("Operation Took " + (System.currentTimeMillis() - millis) + " millis");
+		System.out.println("Generating Maze With Two Room Types");
+		millis = System.currentTimeMillis();
+		byte[][] secondTestMaze = newBlankWalledArray(30, 30, (byte) 0, (byte) 1);
+		fillWithRooms(secondTestMaze, 10, 5, false, (byte) 3, fillWithRooms(secondTestMaze, 10, 5, false, (byte) 4));
+		generateRecursiveBacktrackerMaze(secondTestMaze, (byte) 0, (byte) 1, (byte) 2, getByteWrapper(new byte[]{
+				2, 3, 4
+		})); 
+		printMazeArray(secondTestMaze);
 		System.out.println("Operation Took " + (System.currentTimeMillis() - millis) + " millis");
 	}
 	
