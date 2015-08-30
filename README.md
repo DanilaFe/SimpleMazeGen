@@ -135,3 +135,182 @@ Running this code produces something like:
 # # # # # # # # # # # 
 ```
 Hooray! We made a maze!
+
+### Rooms
+Although fairly basic, I have included the functionality for rooms in this generator. The two functions that help with this are:
+```Java
+fillWithRooms(byte[][] array, int iterations, int maxDim, boolean allowIntersection, byte roomid, ArrayList<Rectangle> existingRects)
+fillWithRooms(byte[][] array, int iterations, int maxDim, boolean allowIntersection, byte roomid)
+```
+Alright, let's take a look from the beginning. We provide the array for the function to work with, the number of times to "attempt" to place the rooms, the maximum size of a room, whether to allow rooms to be placed over each other, the "id" of the tiles in room to be placed, and finally, if applicable, an ArrayList of Rectangles representing the rooms that were already placed into the array, to prevent overlapping if overlapping is disabled. This function also returns an ArrayList of all the rooms that were placed into the array, including the rectangles already provided to the function. Please note that the rectangles produced are actually 2 units / cells wider in both direections, and that is because of a 1-unit border being included with each rectangle. Calling the function without the last argument simply means there were no other rooms placed in it.
+
+Let's test it:
+```Java
+// Get a blank Array
+byte[][] testMaze = MazeGenerator.newBlankWalledArray(20, 20, (byte) 0, (byte) 1);
+// Fill it with the first set of rooms, with the ID 3, not allowing them to interestct
+ArrayList<Rectangle> rooms = MazeGenerator.fillWithRooms(testMaze, 10, 10, false, (byte) 3);
+// Fill it with the second set of rooms, with the ID 4, still not allowing intersection.
+// We also provide the previously returned set of rooms to prevent the new rooms from overlapping the old ones.
+MazeGenerator.fillWithRooms(testMaze, 10, 5, false, (byte) 4, rooms);
+// We use the IDs 3 and 4 because they're hardcoded into the printMazeArray function
+MazeGenerator.printMazeArray(testMaze);
+```
+
+Here is the result of the above code being run:
+```
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# . # . # . # . # . # . # . # . # . # . # . # . # . # . # . # . # + # . # . # . # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # + # # # # # # # 
+# . # . # . # . # . # . # . # . # . # . # . # . # . # + + + # . # + # . # . # . # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # + + + # # # + # # # # # # # 
+# . # . # . # . # - - - - - # . # . # . # . # . # . # + + + # . # + # . # . # . # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # + + + # # # + # # # # # # # 
+# . # + + + + + + + # . # + + + + + + + # . # . # . # + + + # . # + # . # . # . # 
+# # # + + + + + + + # # # + + + + + + + # # # # # # # # # # # # # # # # # # # # # 
+# . # + + + + + + + # . # + + + + + + + # . # . # . # . # . # . # + + + + + + + # 
+# # # + + + + + + + # # # + + + + + + + # # # # # # # # # # # # # + + + + + + + # 
+# . # + + + + + + + # . # + + + + + + + # . # . # . # - - - - - # + + + + + + + # 
+# # # # # # # # # # # # # + + + + + + + # # # # # # # - - - - - # + + + + + + + # 
+# . # . # . # . # . # . # + + + + + + + # . # . # . # - - - - - # + + + + + + + # 
+# # # # # # # # # # # # # + + + + + + + # # # # # # # # # # # # # + + + + + + + # 
+# . # . # . # . # . # . # + + + + + + + # . # . # . # . # . # . # + + + + + + + # 
+# # # # # # # # # # # # # + + + + + + + # # # # # # # # # # # # # + + + + + + + # 
+# . # . # . # . # . # . # + + + + + + + # . # - - - # . # . # . # + + + + + + + # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# . # . # - - - # . # . # . # . # . # . # . # . # . # . # . # . # . # - - - # . # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+# . # . # . # . # . # . # . # . # - - - # . # . # . # + + + # . # . # . # . # . # 
+# # # # # # # # # # # # # # # # # - - - # # # # # # # + + + # # # # # # # # # # # 
+# . # . # . # . # . # . # . # . # - - - # - # . # . # + + + # . # . # . # . # . # 
+# # # # # # # # # # # # # # # # # - - - # - # # # # # + + + # # # # # # # # # # # 
+# . # . # . # . # . # . # . # . # - - - # - # . # . # + + + # . # . # . # . # . # 
+# # # # # # # # # # # # # # # # # # # # # - # # # # # # # # # # # # # # # # # # # 
+# . # . # . # . # . # . # . # . # . # . # - # - # . # + + + # . # . # . # . # . # 
+# # # # # # # # # # # # # # # # # # # # # # # - # # # + + + # # # # # # # # # # # 
+# . # . # . # . # + + + + + + + # . # . # . # - # . # + + + # . # . # . # . # . # 
+# # # # # # # # # + + + + + + + # # # # # # # - # # # + + + # # # # # # # # # # # 
+# . # . # . # . # + + + + + + + # . # . # . # - # . # + + + # . # . # . # . # . # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # + + + # # # # # # # # # # # 
+# . # . # . # . # . # . # . # . # . # . # . # - - - # + + + # . # . # . # . # . # 
+# # # # # # # # # # # # # # # # # # # # # # # - - - # # # # # # # # # # # # # # # 
+# . # . # . # . # . # . # . # . # . # . # . # - - - # . # . # + + + + + # . # . # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # + + + + + # # # # # 
+# . # . # . # . # . # . # . # . # - # . # . # . # . # . # . # + + + + + # . # . # 
+# # # # # # # # # # # # # # # # # - # # # # # # # # # # # # # + + + + + # # # # # 
+# . # . # . # . # . # . # . # . # - # . # . # . # . # . # . # + + + + + # + + + # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+```
+
+There you have it. Two separate sets of different rooms. 
+We can throw in a maze now:
+```Java
+MazeGenerator.generateRecursiveBacktrackerMaze(testMaze, (byte) 0, (byte) 1, (byte) 2, MazeGenerator.getByteWrapper(new byte[]{
+	2, 3, 4
+}));
+```
+
+Notice how we added the ID's 3 and 4 to the array of bytes: we don't want the generator trying to generate mazes inside the rooms. They don't even have walls any more!
+Here's what could be produced:
+```
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+#       #           #           #           #                   #               # 
+#   #   #   # # #   #   #   # # #   # # #   #   #   # # # # #   # # # # #   #   # 
+#   #   #       #       #           #   #       #           #           #   #   # 
+#   # # # # #   # # # # # # #   # # #   # # # # # # # # #   # # # # #   #   # # # 
+#               # + + + + + #       #       #       #       #       #   #       # 
+# # # # # # # # # + + + + + # # #   #   # # #   #   #   # # #   #   #   # # #   # 
+# + + + + + + + # + + + + + #           #       #   #   #       #   #           # 
+# + + + + + + + # + + + + + #   # # # # #   # # # # #   # # # # #   # # #   # # # 
+# + + + + + + + # + + + + + #   # + + + #           #           #           # - # 
+# + + + + + + + # # # # # # #   # + + + # # # # #   # # # # #   # # # # # # # - # 
+# + + + + + + + #       #       # + + + #           #       #   # - - - - - # - # 
+# + + + + + + + #   #   #   # # # # # # # # # # #   #   #   #   # - - - - - # - # 
+# + + + + + + + #   #   #   #   # + + + + + + + #   #   #       # - - - - - # - # 
+# # # # # # # # #   #   #   #   # # # # # # # # #   #   # # # # # # # # # # # # # 
+#                   #   #       #               #   #           # + + + + + + + # 
+#   # # # # # # # # #   # # #   #   #   # # # # #   #   # # #   # + + + + + + + # 
+#       # + + + + + #       #       #   #           #   #       # + + + + + + + # 
+# # #   # + + + + + #   # # #   # # # # #   # # # # # # #   # # # + + + + + + + # 
+#       # + + + + + #           # - - - #               #       # + + + + + + + # 
+#   # # # # # # # # # # # # #   # - - - # # # # # # #   # # #   # + + + + + + + # 
+#   # + + + + + + + + + + + #   # - - - # + #           #       # + + + + + + + # 
+#   # + + + + + + + + + + + # # # # # # # + # # # # #   #   #   # + + + + + + + # 
+#   # + + + + + + + + + + + # - - - #   # + # - - - #       #   # + + + + + + + # 
+#   # + + + + + + + + + + + # - - - #   # + # - - - # # # # #   # # # # # # # # # 
+#   # + + + + + + + + + + + # - - - #   # + # - - - #       #       #           # 
+#   # # # # # # # # # # # # # # # # # # # # # # # # #   # # # # #   # # # # #   # 
+#   #                       # + + + + + + + #                   #               # 
+#   # # # # #   # # # # #   # + + + + + + + #   # # # # # # #   #   # # # # # # # 
+#           #       #       # + + + + + + + #   #           #       # - - - - - # 
+# # # # #   # # # # #   # # # + + + + + + + #   # # # # #   # # # # # - - - - - # 
+# + + + #           #       # + + + + + + + #   #                   # - - - - - # 
+# + + + # # # # #   #   #   # + + + + + + + #   #   # # # # # # #   # - - - - - # 
+# + + + #       #   #   #   # + + + + + + + #       #   #       #   # - - - - - # 
+# + + + #   # # #   # # #   # + + + + + + + # # # # #   #   #   #   # # # # # # # 
+# + + + #   # - #   #       # + + + + + + + # - # - #   #   #   #           #   # 
+# + + + #   # # #   #   #   # + + + + + + + # - # - #   #   #   # # # # #   #   # 
+# + + + #       #       #   # + + + + + + + # - # - #       #           #       # 
+# + + + #   # # # # # # #   # # # # # # # # # # # - #   # # # # # # #   # # #   # 
+# + + + #                       # - - - #       # - #               #           # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+```
+
+Alright! But the rooms so far aren't connected to the maze...That's kind of useless. Here's where we use another function:
+```Java
+connectValues(byte[][] array, byte valA, byte valB)
+```
+
+Not so many arguments in this one. The first is obviously the array we're modifying, the next two are the two types of cells to attempt to unite. The function will see if there are cells of type A and B separated by a wall, remove the wall, and convert the B value into the A value, essentially fusing the two chunks together.
+Let's connect the two types of room to the maze. To do so, we run
+```Java
+MazeGenerator.connectValues(testMaze, (byte) 2, (byte) 3); 
+MazeGenerator.connectValues(testMaze, (byte) 2, (byte) 4); 
+```
+
+Here's the result when executing all the code we wrote in this section:
+```
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+#                       #                   #       #                           # 
+#   # # #   # # # # # # # # # # #   #   #   #   # # #   # # # # # # #   #   # # # 
+#       #                           #   #   #           #               #       # 
+#   # # #   #   # # # # #   #   # # # # # # #   # # # # #   # # # # # # # # # # # 
+#       #   #       #       #           #       #       #   #           #       # 
+#       #   # # # # #   # # # # # # # # # # # # #   #   #   #   # # #   #   #   # 
+#       #           #       #       #               #   #           #       #   # 
+# # # # # # #   #   #       #   #   #   # # # # # # #   #   # # # # # # #   #   # 
+#           #   #   #       #   #       #               #               #   #   # 
+# # #   #   # # #   #       #   #   # # #   # # # # # # #               # # #   # 
+#       #   #       #       #   #       #   #           #               #       # 
+#   # # #   #   # # # # # # #   #       #   #   # # # # #               #   # # # 
+#   #   #   #                   #       #   #           #               #       # 
+#   #   #   # # # # #   #   #   #       #   # # #   #   #               #   #   # 
+#   #       #       #   #   #   #       #       #   #   #               #   #   # 
+#   # # #   #   #   #   #   #   #       # # #   # # #   #               # # #   # 
+#       #       #   #   #   #   #       #   #           #               #       # 
+#   #   # # # # #   #   #   #   #       #   # # # # #   # # # # # # # # #   #   # 
+#   #       #       #   #   #   #       #       #       #   #               #   # 
+#   # # #   # # #   #   #   #   # # # # #   # # #   # # #   #   # # # # #   #   # 
+#       #       #       #   #   #           #       #           #           #   # 
+# # #   # # #   # # # # #   #   #   #   # # #   #   # # # # # # #   # # #   # # # 
+#           #           #   #   #   #       #   #               #   #   #       # 
+#   # # # # #   # # #   #   #   # # # # #   #   #               #   #   #   #   # 
+#           #       #   #   #           #   #   #               #   #       #   # 
+#           #       #   #   #           #   #   # # # # # # # # #   #   # # #   # 
+#           #       #   #   #           #       #                   #       #   # 
+#           # # # # #   # # # # # # # # #   #   #   # # # # # # #   # # #   #   # 
+#           #       #           #       #   #   #               #       #   #   # 
+#           #   #   #   # # #   #   #   #   #   #               #   #   #   # # # 
+#           #   #   #       #   #   #   #   #   #               #   #   #       # 
+#           # # #   #       #   #   #   # # #   #               #   #   # # #   # 
+#           #       #       #   #   #   #       #               #   #       #   # 
+# # # # # # #   #   # # # # #   # # #   #   # # #               #   # # #   #   # 
+#   #           #   #       #           #   #   #               #   #   #   #   # 
+#   #   #   # # #   # # #   # # # # # # #   #   # # # # # # # # #   #   #   #   # 
+#       #       #                       #       #               #       #   #   # 
+#   # # # # #   # # # # # # # # # # # # # # #   #   # # # # #   # # # # #   # # # 
+#           #                                       #                           # 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+```
+
+That's it! You've made a maze with rooms!
