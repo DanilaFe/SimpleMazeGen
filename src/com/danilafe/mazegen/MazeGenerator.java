@@ -202,6 +202,7 @@ public class MazeGenerator {
 	 * @param maze the maze to read from 
 	 * @param w the x-coordinate or the w-position of the potentially surrounded cell
 	 * @param h the y-coordinate or the h-position of the potentially surround cell
+	 * @param tiletypes the types of tiles to avoid overwriting
 	 * @return
 	 */
 	private static boolean isSurrounded(byte[][] maze, int w, int h, Byte[] tiletypes){
@@ -243,6 +244,9 @@ public class MazeGenerator {
 	 * @param y the starting y-coordinate of the flood fill
 	 * @param toReplace the value to be replaced
 	 * @param value the value to replace with
+	 * @param current the current stack height, counting from the first iteration of this function
+	 * @param the max stack height
+	 * @param lastCell the cell to return to once the function stops due to stack overflow
 	 */
 	private static boolean floodFill(byte[][] array, int x, int y, byte toReplace, byte value, int current, int maxStack, int[] lastCell){
 		if (array[x][y] != toReplace) return false;
@@ -275,6 +279,9 @@ public class MazeGenerator {
 	 * @param array the array to perform the operation on.
 	 * @param iterations how many times to try place a room
 	 * @param maxDim the maximum possible width / height of a room.
+	 * @param allowIntersection whether to allow rooms to intersect 
+	 * @param roomid the tile ID to place as the room
+	 * @param existingRects rectangles preresenting other rooms already placed
 	 */
 	public static ArrayList<Rectangle> fillWithRooms(byte[][] array, int iterations, int maxDim, boolean allowIntersection, byte roomid, ArrayList<Rectangle> existingRects){
 		int arrayWidthCorridors = (array.length - 1) / 2;
@@ -381,6 +388,12 @@ public class MazeGenerator {
 		}
 	}
 	
+	/**
+	 * Checks if an array still has the provided ID
+	 * @param array the array to check
+	 * @param value the value to check for
+	 * @return true if the array still contains the value
+	 */
 	private static boolean containsValue(byte[][] array, byte value){
 		boolean contains = false;
 		for(int w = 0; w < array.length; w++){
@@ -391,10 +404,23 @@ public class MazeGenerator {
 		return contains;
 	}
 	
+	/**
+	 * Set the Random seed
+	 * @param seed the seed to use
+	 */
 	public static void setSeed(long seed){
 		random.setSeed(seed);
 	}
 	
+	/**
+	 * Creates a buffered image with the given parameters.
+	 * @param mazeArray the array to convert to an image
+	 * @param cellWidth the width of the cells drawn on the image
+	 * @param cellHeight the height of the cells drawn on the image
+	 * @param wallColor the color of the walls to draw to the buffered image
+	 * @param emptyColor the color of the floor to draw to the buffered image
+	 * @return the produced buffered image
+	 */
 	public static BufferedImage generateMazeImage(byte[][] mazeArray, int cellWidth, int cellHeight, Color wallColor, Color emptyColor){
 		BufferedImage bufferedImage = new BufferedImage(mazeArray.length * cellWidth, mazeArray[0].length * cellHeight, BufferedImage.TYPE_INT_RGB);
 		Graphics2D graphics = bufferedImage.createGraphics();
@@ -408,6 +434,11 @@ public class MazeGenerator {
 		return bufferedImage;
 	}
 	
+	/**
+	 * Converts array of primitive bytes to their wrappers
+	 * @param from the array of primitives to convert
+	 * @return the converted array
+	 */
 	public static Byte[] getByteWrapper(byte[] from){
 		Byte[] byteWrapper = new Byte[from.length];
 		for(int i = 0; i < byteWrapper.length; i++){
