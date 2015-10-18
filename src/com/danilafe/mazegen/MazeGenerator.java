@@ -447,7 +447,26 @@ public class MazeGenerator {
 		return byteWrapper;
 	}
 	
-	public static void main(String[] args) {
+	public static void removeDeadEnds(byte[][] toClean, byte id, byte replaceWith){
+		for(int i = 1; i < toClean.length; i ++){
+			for(int j = 1; j < toClean[0].length; j ++){
+				if(toClean[i][j] != id) continue;
+				int neighborCount = 0; 
+				if(i > 0 && toClean[i - 1][j] == id) neighborCount ++;
+				if(i < toClean.length - 1 && toClean[i + 1][j] == id) neighborCount ++;
+				if(j > 0 && toClean[i][j - 1] == id) neighborCount ++;
+				if(j < toClean[0].length && toClean[i][j + 1] == id) neighborCount ++;
+				if(neighborCount < 2) {
+					toClean[i][j] = replaceWith;
+					i = 1;
+					j = 1;
+				}
+				// You could actually make this recursive. TODO
+			}
+		}
+	}
+	
+	public static void main(String[] args) throws FileNotFoundException, IOException {
 		System.out.println("Running Tests");
 		System.out.println("Generating Recursive Backtracker Maze");
 		long millis = System.currentTimeMillis();
